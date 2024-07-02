@@ -1,0 +1,103 @@
+# Define the version of Docker Compose being used
+version: "3"
+
+# Define services for the Docker Compose configuration
+services:
+    # MariaDB service configuration
+    mariadb:
+        # Use the MariaDB Docker image
+        image: mariadb
+        # Set the container name to mariadb
+        container_name: mariadb
+        # Connect to the inception network
+        networks:
+            - inception
+        # Build the MariaDB service from the specified directory
+        build: ./requirements/mariadb/.
+        # Load environment variables from the .env file
+        env_file: .env
+        # Restart the container on failure
+        restart: on-failure
+        # Mount the mariadb volume to persist data
+        volumes:
+            - mariadb:/var/lib/mysql # Data will be written to the host disk
+
+
+    # Nginx service configuration
+    nginx:
+        # Use the Nginx Docker image
+        image: nginx
+        # Set the container name to nginx
+        container_name: nginx
+        # Mount the wordpress volume to serve WordPress files
+        volumes:
+            - wordpress:/var/www/wordpress
+        # Connect to the inception network
+        networks:
+            - inception
+        # Depend on the wordpress service
+        depends_on:
+            - wordpress
+        # Build the Nginx service from the specified directory
+        build: ./requirements/nginx/.
+        # Load environment variables from the .env file
+        env_file: .env
+        # Expose port 443 for HTTPS
+        ports:
+            - "443:443"
+        # Restart the container on failure
+        restart: on-failure
+
+
+    # WordPress service configuration
+    wordpress:
+        # Use the WordPress Docker image
+        image: wordpress
+        # Set the container name to wordpress
+        container_name: wordpress
+        # Load environment variables from the .env file
+        env_file: .env
+        # Mount the wordpress volume to persist WordPress files
+        volumes:
+            - wordpress:/var/www/wordpress
+        # Connect to the inception network
+        networks:
+            - inception
+        # Build the WordPress service from the specified directory
+        build: ./requirements/wordpress/.
+        # Depend on the mariadb service
+        depends_on:
+            - mariadb
+        # Restart the container on failure
+        restart: on-failure
+
+# Define volumes for persistent storage
+volumes:
+    # Define the mariadb volume
+    mariadb:
+        # Use a local driver
+        driver: local
+        # Specify driver options
+        driver_opts:
+            type: none
+            o: bind
+            device: ~/data/mariadb
+
+
+    # Define the wordpress volume
+    wordpress:
+        # Use a local driver
+        driver: local
+        # Specify driver options
+        driver_opts:
+            type: none
+            o: bind
+            device: ~/data/wordpress
+
+
+# Define networks
+networks:
+    # Define the inception network
+    inception:
+        # Set the network name to inception
+        name: inception
