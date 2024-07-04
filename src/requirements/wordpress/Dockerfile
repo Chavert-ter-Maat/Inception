@@ -16,6 +16,11 @@ RUN apt-get install -y net-tools \
 
 RUN apt install curl -y
 
+# Install WP-CLI
+RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+    && chmod +x wp-cli.phar \
+    && mv wp-cli.phar /usr/local/bin/wp
+
 # Create the directory for the PHP-FPM socket
 RUN mkdir -p /run/php
 

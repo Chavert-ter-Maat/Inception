@@ -1,16 +1,17 @@
-#!/bin/bash
+#!bin/bash
 
-mysqld --skip-grant-tables --skip-networking &
+if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE}" ]
+then
+	service mariadb start;
+	sleep 3
+    echo "Creating database: ${MYSQL_DATABASE}"
 
-sleep 3
+    mysql -e "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"
+    mysql -e "CREATE USER IF NOT EXISTS  \`${MYSQL_USER}\`@'localhost' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+    mysql -e "GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USER}\`@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+    mysql -e "FLUSH PRIVILEGES;"
+	service mariadb stop;
+fi
 
-
-
-# Restarting MariaDB with init file
-mysqladmin -u root shutdown
-
-echo "Mariadb initialized and started ..."
-
-mysqld --init-file=/init.sql
-
-echo "Error in starting MariaDB ..."
+echo "exec(mysqld)"
+exec mysqld

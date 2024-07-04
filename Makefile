@@ -13,17 +13,25 @@ all:
 down:
 	@docker-compose -f src/docker-compose.yml down; echo "$(COLOR_GREEN)🛑 Docker-compose down$(COLOR_RESET)"
 
-re:
-	@docker-compose -f src/docker-compose.yml up --build -d; echo "$(COLOR_GREEN)🔄 Docker-compose rebuilt and running$(COLOR_RESET)"
+re: down clean all
+	@echo "$(COLOR_GREEN)🔄 Docker-compose rebuilt and running$(COLOR_RESET)"
 
 maria:
-	@docker exec -it mariadb bash; echo "$(COLOR_GREEN)🐬 Entered mariadb container$(COLOR_RESET)"
+	@docker exec -it mariadb bash;
+
+nginx:
+	@docker exec -it nginx bash;
+
+wordpress:
+	@docker exec -it wordpress bash;
 
 clean:
-	@docker stop $$(docker ps -qa); echo "$(COLOR_GREEN)🛑 Stopped all running containers$(COLOR_RESET)"; \
-	docker rm $$(docker ps -qa); echo "$(COLOR_GREEN)🗑️ Removed all containers$(COLOR_RESET)"; \
-	docker rmi -f $$(docker images -q); echo "$(COLOR_GREEN)🗑️ Removed all images$(COLOR_RESET)"; \
-	docker volume rm $$(docker volume ls -q); echo "$(COLOR_GREEN)🗑️ Removed all volumes$(COLOR_RESET)"; \
-	rm -rf ~/data/mariadb ~/data/wordpress; echo "$(COLOR_GREEN)🗑️ Deleted directories ~/data/mariadb and ~/data/wordpress$(COLOR_RESET)"
+	@docker ps -qa | xargs docker stop || true
+	@docker ps -qa | xargs docker rm -f || true
+	@docker images -q | xargs docker rmi -f || true
+	@docker volume ls -q | xargs docker volume rm || true
+	@rm -rf ~/data/mariadb ~/data/wordpress
+	@echo "$(COLOR_GREEN)🗑️ Cleaned up Docker containers, images, volumes, and directories$(COLOR_RESET)"
+
 
 .PHONY: all re down clean

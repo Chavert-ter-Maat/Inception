@@ -1,19 +1,17 @@
-FROM debian:buster
+FROM debian:bullseye
 
-RUN apt-get update -y
+RUN apt-get update -y && apt-get upgrade -y && apt-get install -y mariadb-server nano
 
-RUN apt-get install -y mariadb-server
+RUN mkdir -p /var/run/mysqld 
+RUN chown -R mysql:mysql /var/run/mysqld && \
+	chown -R mysql:mysql /var/lib/mysql && \
+	chown -R mysql:mysql /etc/mysql
 
-RUN mkdir -p /var/run/mysqld && \
-    chown -R mysql:mysql /var/run/mysqld && \
-    chown -R mysql:mysql /etc/mysql
+RUN chmod 777 /run/mysqld
 
-COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/
-COPY ./tools/start_mariadb.sh /
-COPY ./conf/init.sql /init.sql
+COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./tools/start_mariadb.sh .
 
-RUN chown mysql:mysql /start_mariadb.sh
-RUN chmod +x /start_mariadb.sh
+RUN chmod +x start_mariadb.sh
 
-ENTRYPOINT [ "/start_mariadb.sh" ]
-CMD [ "mysqld" ]
+ENTRYPOINT ["./start_mariadb.sh"]
