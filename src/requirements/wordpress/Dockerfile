@@ -1,35 +1,19 @@
-# Dockerfile to set up a WordPress environment with PHP-FPM and MariaDB Client.
+# Description: Wordpress Dockerfile
 
-#Base Image.
-FROM debian:buster
+# pull the base image
+FROM debian:bullseye
 
-RUN apt-get update -y
+# update and upgrade the system
+RUN apt-get update && apt-get upgrade -y
 
-#Install all requiered packages.
-RUN apt-get -y install wget
+# install the required packages
+RUN apt-get install -y curl php php7.4-fpm php-mysql mariadb-client netcat
 
-RUN apt-get install -y net-tools \
-     php7.3 \
-     php-mysql \
-     php-fpm \
-     mariadb-client
+# copy the wordpress configuration script to the root directory in the container
+COPY ./wp_conf.sh /
 
-RUN apt install curl -y
+# change the permission of the script to make it executable
+RUN  chmod +x wp_conf.sh
 
-# Install WP-CLI
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp
-
-# Create the directory for the PHP-FPM socket
-RUN mkdir -p /run/php
-
-# Copy WordPress script and wp-config.php to the container
-COPY ./tools/start_wp.sh /start_wp.sh
-COPY ./conf/wp-config.php /wp-config.php
-
-# Making the WordPress script runnable.
-RUN chmod +x start_wp.sh
-
-# Specifies the script that's run everytime the container starts.
-CMD ["./start_wp.sh"]
+# define the entrypoint command to run when the container starts
+ENTRYPOINT ["./wp_conf.sh"]
