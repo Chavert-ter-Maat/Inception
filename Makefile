@@ -3,16 +3,22 @@
 # DB_DATA = /Users/chaverttermaat/data/mariadb
 
 # 42 linux
-WP_DATA_42 = ~/goinfre/data/wordpress
-DB_DATA_42 = ~/goinfre/data/mariadb
+# WP_DATA = ~/goinfre/data/wordpress
+# DB_DATA = ~/goinfre/data/mariadb
+
+# VM
+WP_DATA = /home/cter-maa/data/wordpress
+DB_DATA = /home/cter-maa/data/mariadb
+
+
 
 all: up
 
 up: build
-	@mkdir -p $(DB_DATA_42)
-	@mkdir -p $(WP_DATA_42)
-	@chmod -R 755 $(DB_DATA_42)
-	@chmod -R 755 $(WP_DATA_42)
+	@mkdir -p $(DB_DATA)
+	@mkdir -p $(WP_DATA)
+	@chmod -R 755 $(DB_DATA)
+	@chmod -R 755 $(WP_DATA)
 	docker-compose -f ./src/docker-compose.yml up -d
 
 down:
@@ -43,8 +49,8 @@ clean:
 	@docker rmi -f $$(docker images -qa) || true
 	@docker volume rm $$(docker volume ls -q) || true
 	@docker network rm $$(docker network ls -q) || true
-	@rm -rf $(WP_DATA_42) || true
-	@rm -rf $(DB_DATA_42) || true
+	@rm -rf $(WP_DATA) || true
+	@rm -rf $(DB_DATA) || true
 
 re: clean up
 
