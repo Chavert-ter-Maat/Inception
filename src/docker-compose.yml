@@ -3,16 +3,16 @@ volumes:
     name: mariadb
     driver: local
     driver_opts:
-      device:  /Users/chaverttermaat/data/mariadb
-      #device: ~/goinfre/data/mariadb
+      # device:  /Users/chaverttermaat/data/mariadb
+      device: ~/goinfre/data/mariadb
       o : bind
       type : none
   wordpress:
     name: wordpress
     driver: local
     driver_opts:
-      device: /Users/chaverttermaat/data/wordpress
-      # device: ~/goinfre/data/wordpress
+      # device: /Users/chaverttermaat/data/wordpress
+      device: ~/goinfre/data/wordpress
       o : bind
       type : none
 
