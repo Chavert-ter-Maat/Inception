@@ -1,37 +1,50 @@
-NAME = inception
+WP_DATA = /Users/chaverttermaat/data/wordpress
+DB_DATA = /Users/chaverttermaat/data/mariadb
 
-# Define color codes
-COLOR_RESET=\033[0m
-COLOR_GREEN=\033[32m
+# 42 linux
+# WP_DATA_42 = ~/goinfre/data/wordpress
+# DB_DATA_42 = ~/goinfre/data/mariadb
 
-all:
-	@mkdir -p ~/data/mariadb; echo "$(COLOR_GREEN)✅ Created directory ~/data/mariadb$(COLOR_RESET)"
-	@mkdir -p ~/data/wordpress; echo "$(COLOR_GREEN)✅ Created directory ~/data/wordpress$(COLOR_RESET)"
-	@docker-compose -f src/docker-compose.yml up --build -d;
-	@echo "$(COLOR_GREEN)🌟 Everything up and running ...$(COLOR_RESET)"
+all: up
+
+up: build
+	@mkdir -p $(DB_DATA)
+	@mkdir -p $(WP_DATA)
+	@chmod -R 755 $(DB_DATA)
+	@chmod -R 755 $(WP_DATA)
+	docker-compose -f ./src/docker-compose.yml up -d
 
 down:
-	@docker-compose -f src/docker-compose.yml down; echo "$(COLOR_GREEN)🛑 Docker-compose down$(COLOR_RESET)"
+	docker-compose -f ./src/docker-compose.yml down
 
-re: down clean all
-	@echo "$(COLOR_GREEN)🔄 Docker-compose rebuilt and running$(COLOR_RESET)"
+stop:
+	docker-compose -f ./src/docker-compose.yml stop
 
-maria:
-	@docker exec -it mariadb bash;
+run:
+	docker-compose -f ./src/docker-compose.yml start
+
+build:
+	clear
+	docker-compose -f ./src/docker-compose.yml build
 
 nginx:
-	@docker exec -it nginx bash;
+	@docker exec -it nginx zsh
+
+mariadb:
+	@docker exec -it mariadb zsh
 
 wordpress:
-	@docker exec -it wordpress bash;
+	@docker exec -it wordpress zsh
 
 clean:
-	@docker ps -qa | xargs docker stop || true
-	@docker ps -qa | xargs docker rm -f || true
-	@docker images -q | xargs docker rmi -f || true
-	@docker volume ls -q | xargs docker volume rm || true
-	@rm -rf ~/data/mariadb ~/data/wordpress
-	@echo "$(COLOR_GREEN)🗑️ Cleaned up Docker containers, images, volumes, and directories$(COLOR_RESET)"
+	@docker stop $$(docker ps -qa) || true
+	@docker rm $$(docker ps -qa) || true
+	@docker rmi -f $$(docker images -qa) || true
+	@docker volume rm $$(docker volume ls -q) || true
+	@docker network rm $$(docker network ls -q) || true
+	@rm -rf $(WP_DATA) || true
+	@rm -rf $(DB_DATA) || true
 
+re: clean up
 
-.PHONY: all re down clean
+.PHONY: all up down stop run build nginx mariadb wordpress clean re

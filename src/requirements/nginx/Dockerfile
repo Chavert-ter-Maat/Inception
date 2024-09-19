@@ -1,28 +1,19 @@
-FROM debian:buster
+FROM debian:bullseye
 
-# Update packages and install necessary dependencies
-RUN apt-get update -y \
-    && apt-get install -y nginx openssl curl libfcgi0ldbl
+RUN apt-get update && apt-get upgrade -y
 
-# Create directory for SSL certificates
+RUN apt-get install -y nginx openssl
+
 RUN mkdir -p /etc/nginx/ssl
 
-# Copy Nginx config file and start script
-COPY conf/nginx.conf /etc/nginx/sites-available/default
-COPY ./tools/start_nginx.sh /start_nginx.sh
+# make ssl certificate
+RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout \
+    /etc/nginx/ssl/inception.key -subj "/C=MO/ST=KH/L=KH/O=42/OU=42/CN=cter-maa.42.fr/UID=admin_name"
 
-# Make the start script executable
-RUN chmod +x /start_nginx.sh
+COPY ./conf/nginx.conf /etc/nginx/nginx.conf
 
-# Remove default symlink and create a new one for our config
-RUN rm -f /etc/nginx/sites-enabled/default && \
-    ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+RUN mkdir -p /var/www/wordpress
 
-# Generate a self-signed SSL certificate
-RUN openssl req -x509 -nodes -newkey rsa:2048 -out /etc/nginx/ssl/cter-maa.crt -keyout /etc/nginx/ssl/cter-maa.key -subj "/CN=cter-maa.42.fr"
+RUN chown -R www-data:www-data /var/www/wordpress
 
-# Expose port 443 for HTTPS access
-EXPOSE 443
-
-# Set entrypoint to start script
-ENTRYPOINT [ "/start_nginx.sh" ]
+CMD ["nginx", "-g", "daemon off;"]

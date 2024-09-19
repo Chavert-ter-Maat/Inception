@@ -1,60 +1,63 @@
-version: "3"
+volumes:
+  mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      device:  /Users/chaverttermaat/data/mariadb
+      #device: ~/goinfre/data/mariadb
+      o : bind
+      type : none
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      device: /Users/chaverttermaat/data/wordpress
+      # device: ~/goinfre/data/wordpress
+      o : bind
+      type : none
+
+networks:
+  inception:
+    name: inception
 
 services:
-    mariadb:
-        image: mariadb
-        container_name: mariadb
-        networks:
-            - inception
-        build: ./requirements/mariadb/.
-        env_file: .env
-        restart: on-failure
-        volumes:
-            - mariadb:/var/lib/mysql
-
-    nginx:
-        image: nginx
-        container_name: nginx
-        volumes:
-            - wordpress:/var/www/wordpress
-        networks:
-            - inception
-        depends_on:
-            - wordpress
-        build: ./requirements/nginx/.
-        env_file: .env
-        ports:
-            - "443:443"
-        restart: on-failure
-
-    wordpress:
-        image: wordpress
-        container_name: wordpress
-        env_file: .env
-        volumes:
-            - wordpress:/var/www/wordpress
-        networks:
-            - inception
-        build: ./requirements/wordpress/.
-        depends_on:
-            - mariadb
-        restart: on-failure
-
-volumes:
-    mariadb:
-        driver: local
-        driver_opts:
-            type: none
-            o: bind
-            device: ~/data/mariadb
-
-    wordpress:
-        driver: local
-        driver_opts:
-            type: none
-            o: bind
-            device: ~/data/wordpress
-   
-networks:
-    inception:
-        name: inception
+#mariadb
+  mariadb:
+    image: mariadb:afatir
+    container_name: mariadb
+    build: ./requirements/mariadb
+    volumes:
+      - mariadb:/var/lib/mysql
+    env_file :
+      - .env
+    networks :
+      - inception
+    restart: always
+#nginx
+  nginx:
+    image: nginx:afatir
+    container_name: nginx
+    build: ./requirements/nginx
+    ports:
+      - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+      - wordpress:/var/www/wordpress
+    networks:
+      - inception
+    restart: always
+#wordpress
+  wordpress:
+    image: wordpress:afatir
+    container_name: wordpress
+    build: ./requirements/wordpress
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/wordpress
+    env_file :
+      - .env
+    networks:
+      - inception
+    restart: always
