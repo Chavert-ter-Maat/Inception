@@ -15,10 +15,10 @@ DB_DATA = /home/cter-maa/data/mariadb
 all: up
 
 up: build
-	@mkdir -p $(DB_DATA)
-	@mkdir -p $(WP_DATA)
-	@chmod -R 755 $(DB_DATA)
-	@chmod -R 755 $(WP_DATA)
+	mkdir -p $(DB_DATA)
+	mkdir -p $(WP_DATA)
+	chmod -R 755 $(DB_DATA)
+	chmod -R 755 $(WP_DATA)
 	docker-compose -f ./src/docker-compose.yml up -d
 
 down:
@@ -35,22 +35,22 @@ build:
 	docker-compose -f ./src/docker-compose.yml build
 
 nginx:
-	@docker exec -it nginx zsh
+	docker exec -it nginx zsh
 
 mariadb:
-	@docker exec -it mariadb zsh
+	docker exec -it mariadb zsh
 
 wordpress:
-	@docker exec -it wordpress zsh
+	docker exec -it wordpress zsh
 
 clean:
-	@docker stop $$(docker ps -qa) || true
-	@docker rm $$(docker ps -qa) || true
-	@docker rmi -f $$(docker images -qa) || true
-	@docker volume rm $$(docker volume ls -q) || true
-	@docker network rm $$(docker network ls -q) || true
-	@rm -rf $(WP_DATA) || true
-	@rm -rf $(DB_DATA) || true
+	docker stop $$(docker ps -qa) || true
+	docker rm $$(docker ps -qa) || true
+	docker rmi -f $$(docker images -qa) || true
+	docker volume rm $$(docker volume ls -q) || true
+	docker network rm $$(docker network ls -q) || true
+	rm -rf $(WP_DATA) || true
+	rm -rf $(DB_DATA) || true
 
 re: clean up
 
